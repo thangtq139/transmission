@@ -1728,6 +1728,9 @@ void tr_torrentVerify (tr_torrent           * torrent,
                        tr_verify_done_func    callback_func_or_NULL,
                        void                 * callback_data_or_NULL);
 
+void tr_torrentVerifyNoHashCheck (tr_torrent           * torrent,
+                       tr_verify_done_func    callback_func_or_NULL,
+                       void                 * callback_data_or_NULL);
 /***********************************************************************
  * tr_info
  **********************************************************************/

@@ -402,6 +402,31 @@ torrentReannounce (tr_session               * session,
   return NULL;
 }
 
+static const char *torrentVerifyNoHashCheck(
+        tr_session *session,
+        tr_variant *args_in,
+        tr_variant *args_out UNUSED,
+        struct tr_rpc_idle_data *idle_data UNUSED
+        )
+{
+    int i;
+    int torrentCount;
+    tr_torrent ** torrents;
+
+    assert (idle_data == NULL);
+
+    torrents = getTorrents (session, args_in, &torrentCount);
+    for (i=0; i<torrentCount; ++i)
+    {
+        tr_torrent * tor = torrents[i];
+        tr_torrentVerifyNoHashCheck (tor, NULL, NULL);
+        notify (session, TR_RPC_TORRENT_CHANGED, tor);
+    }
+
+    tr_free (torrents);
+    return NULL;
+}
+
 static const char*
 torrentVerify (tr_session               * session,
                tr_variant               * args_in,
@@ -2186,6 +2211,7 @@ methods[] =
   { "torrent-start-now",     true,  torrentStartNow     },
   { "torrent-stop",          true,  torrentStop         },
   { "torrent-verify",        true,  torrentVerify       },
+  { "torrent-verify-no-hash-checkt",        true,  torrentVerifyNoHashCheck       },
   { "torrent-reannounce",    true,  torrentReannounce   },
   { "queue-move-top",        true,  queueMoveTop        },
   { "queue-move-up",         true,  queueMoveUp         },

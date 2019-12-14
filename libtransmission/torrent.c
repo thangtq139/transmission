@@ -1799,6 +1799,30 @@ onVerifyDone (tr_torrent * tor, bool aborted, void * vdata)
 }
 
 static void
+verifyTorrentNoHashCheck (void * vdata)
+{
+  bool startAfter;
+  struct verify_data * data = vdata;
+  tr_torrent * tor = data->tor;
+  tr_sessionLock (tor->session);
+
+  /* if the torrent's already being verified, stop it */
+  tr_verifyRemove (tor);
+
+  startAfter = (tor->isRunning || tor->startAfterVerify) && !tor->isStopping;
+  if (tor->isRunning)
+    tr_torrentStop (tor);
+  tor->startAfterVerify = startAfter;
+
+  if (setLocalErrorIfFilesDisappeared (tor))
+    tor->startAfterVerify = false;
+  else
+    tr_verifyAddNoHashCheck (tor, onVerifyDone, data);
+
+  tr_sessionUnlock (tor->session);
+}
+
+static void
 verifyTorrent (void * vdata)
 {
   bool startAfter;
@@ -1820,6 +1844,21 @@ verifyTorrent (void * vdata)
     tr_verifyAdd (tor, onVerifyDone, data);
 
   tr_sessionUnlock (tor->session);
+}
+
+void
+tr_torrentVerifyNoHashCheck (tr_torrent           * tor,
+                  tr_verify_done_func    callback_func,
+                  void                 * callback_data)
+{
+  struct verify_data * data;
+
+  data = tr_new (struct verify_data, 1);
+  data->tor = tor;
+  data->aborted = false;
+  data->callback_func = callback_func;
+  data->callback_data = callback_data;
+  tr_runInEventThread (tor->session, verifyTorrentNoHashCheck, data);
 }
 
 void

@@ -1,55 +1,88 @@
-ABOUT
+## Skip hash check
 
-  Transmission is a fast, easy, and free BitTorrent client.
-  It comes in several flavors:
+### Ubuntu 18.04
 
-    * A native Mac OS X GUI application
-    * GTK+ and Qt GUI applications for Linux, BSD, etc.
-    * A headless daemon for servers and routers
-    * A web UI for remote controlling any of the above
+  $ sudo apt-get install build-essential automake autoconf libtool pkg-config intltool libcurl4-openssl-dev libglib2.0-dev libevent-dev libminiupnpc-dev libgtk-3-dev libappindicator3-dev
+  $ git clone --recursive https://github.com/thangtq139/transmission
+  $ cd transmission
+  $ mkdir -p build
+  $ cd build
+  $ cmake ..
+  $ make
 
-  Visit https://transmissionbt.com/ for more information.
+## About
 
-BUILDING
+Transmission is a fast, easy, and free BitTorrent client. It comes in several flavors:
+  * A native Mac OS X GUI application
+  * GTK+ and Qt GUI applications for Linux, BSD, etc.
+  * A headless daemon for servers and routers
+  * A web UI for remote controlling any of the above
 
-  Transmission has an Xcode project file (Transmission.xcodeproj)
-  for building in Xcode.
+Visit https://transmissionbt.com/ for more information.
 
-  For a more detailed description, and dependancies, visit:
-  https://github.com/transmission/transmission/wiki
+## Command line interface notes
 
-  Building a Transmission release from the command line:
+Transmission is fully supported in transmission-remote, the preferred cli client.
 
-    $ xz -d -c transmission-2.11.tar.xz | tar xf -
-    $ cd transmission-2.11
-    $ ./configure
+Three standalone tools to examine, create, and edit .torrent files exist: transmission-show, transmission-create, and transmission-edit, respectively.
+
+Prior to development of transmission-remote, the standalone client transmission-cli was created. Limited to a single torrent at a time, transmission-cli is deprecated and exists primarily to support older hardware dependent upon it. In almost all instances, transmission-remote should be used instead.
+
+Different distributions may choose to package any or all of these tools in one or more separate packages.
+
+## Building
+
+Transmission has an Xcode project file (Transmission.xcodeproj) for building in Xcode.
+
+For a more detailed description, and dependencies, visit: https://github.com/transmission/transmission/wiki
+
+### Building a Transmission release from the command line
+
+    $ tar xf transmission-2.92.tar.xz
+    $ cd transmission-2.92
+    $ mkdir build
+    $ cd build
+    $ cmake ..
     $ make
     $ sudo make install
 
-  Building Transmission from the nightly builds:
+### Building Transmission from the nightly builds
 
-    Download a tarball from https://build.transmissionbt.com/job/trunk-linux-inc/
-    and follow the steps from the previous section.
+Download a tarball from https://build.transmissionbt.com/job/trunk-linux/ and follow the steps from the previous section.
 
-    If you're new to building programs from source code, this is typically 
-    easier than building from SVN.
+If you're new to building programs from source code, this is typically easier than building from Git.
 
-  Building Transmission from SVN (First Time):
+### Building Transmission from Git (first time)
 
-    $ svn co svn://svn.transmissionbt.com/Transmission/trunk Transmission
+    $ git clone https://github.com/transmission/transmission Transmission
     $ cd Transmission
-    $ ./autogen.sh
+    $ git submodule update --init
+    $ mkdir build
+    $ cd build
+    $ cmake ..
     $ make
     $ sudo make install
 
-  Building Transmission from SVN (Updating):
+### Building Transmission from Git (updating)
 
-    $ cd Transmission
+    $ cd Transmission/build
     $ make clean
-    $ svn up
-    $ ./update-version-h.sh 
+    $ git pull --rebase --prune
+    $ git submodule update
+    $ cmake ..
     $ make
     $ sudo make install
 
-  Notes for building on Solaris' C compiler:  User av reports success with
-  this invocation: ./configure CC=c99 CXX=CC CFLAGS='-D__EXTENSIONS__ -mt'
+## Contributing
+
+### Code Style
+
+You would want to setup your editor to make use of uncrustify.cfg and .jsbeautifyrc configuration files located in the root of this repository.
+
+If for some reason you are unwilling or unable to do so, there is a shell script which you could run either directly or via docker-compose:
+
+    $ ./code_style.sh
+    or
+    $ docker-compose build --pull
+    $ docker-compose run --rm code_style
+

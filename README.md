@@ -2,13 +2,13 @@
 
 ### Ubuntu 18.04
 
-  $ sudo apt-get install build-essential automake autoconf libtool pkg-config intltool libcurl4-openssl-dev libglib2.0-dev libevent-dev libminiupnpc-dev libgtk-3-dev libappindicator3-dev
-  $ git clone --recursive https://github.com/thangtq139/transmission
-  $ cd transmission
-  $ mkdir -p build
-  $ cd build
-  $ cmake ..
-  $ make
+    $ sudo apt-get install build-essential automake autoconf libtool pkg-config intltool libcurl4-openssl-dev libglib2.0-dev libevent-dev libminiupnpc-dev libgtk-3-dev libappindicator3-dev
+    $ git clone --recursive https://github.com/thangtq139/transmission
+    $ cd transmission
+    $ mkdir -p build
+    $ cd build
+    $ cmake ..
+    $ make
 
 ## About
 

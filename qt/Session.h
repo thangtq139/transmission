@@ -108,6 +108,7 @@ class Session: public QObject
     void addTorrent (const AddData& addme);
     void removeTorrents (const QSet<int>& torrentIds, bool deleteFiles = false);
     void verifyTorrents (const QSet<int>& torrentIds);
+    void skipHashCheck (const QSet<int>& torrentIds);
     void reannounceTorrents (const QSet<int>& torrentIds);
     void launchWebInterface ();
     void updatePref (int key);

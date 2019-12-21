@@ -298,6 +298,7 @@ static tr_option opts[] =
     { 830, "utp",                    "Enable uTP for peer connections", NULL, 0, NULL },
     { 831, "no-utp",                 "Disable uTP for peer connections", NULL, 0, NULL },
     { 'v', "verify",                 "Verify the current torrent(s)", "v",  0, NULL },
+    { 'k', "skip-hash",                 "Skip hash check the current torrent(s)", "k",  0, NULL },
     { 'V', "version",                "Show version number and exit", "V", 0, NULL },
     { 'w', "download-dir",           "When used in conjunction with --add, set the new torrent's download folder. Otherwise, set the default download folder", "w",  1, "<path>" },
     { 'x', "pex",                    "Enable peer exchange (PEX)", "x",  0, NULL },
@@ -462,6 +463,9 @@ getOptMode (int val)
         return MODE_SESSION_STATS;
 
       case 'v': /* verify */
+        return MODE_TORRENT_VERIFY;
+
+      case 'k':
         return MODE_TORRENT_VERIFY;
 
       case 600: /* reannounce */
@@ -2261,6 +2265,17 @@ processArgs (const char * rpcurl, int argc, const char * const * argv)
                 top = tr_new0 (tr_variant, 1);
                 tr_variantInitDict (top, 2);
                 tr_variantDictAddStr (top, TR_KEY_method, "torrent-reannounce");
+                addIdArg (tr_variantDictAddDict (top, ARGUMENTS, 1), id, NULL);
+                status |= flush (rpcurl, &top);
+                break;
+            }
+            case 'k':
+            {
+                tr_variant * top;
+                if (tset != 0) { addIdArg (tr_variantDictFind (tset, ARGUMENTS), id, NULL); status |= flush (rpcurl, &tset); }
+                top = tr_new0 (tr_variant, 1);
+                tr_variantInitDict (top, 2);
+                tr_variantDictAddStr (top, TR_KEY_method, "torrent-verify-no-hash-check");
                 addIdArg (tr_variantDictAddDict (top, ARGUMENTS, 1), id, NULL);
                 status |= flush (rpcurl, &top);
                 break;

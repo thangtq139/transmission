@@ -261,6 +261,7 @@ refresh_actions (gpointer gdata)
       gtr_action_set_sensitive ("torrent-start", (sel_counts.stopped_count) > 0);
       gtr_action_set_sensitive ("torrent-start-now", (sel_counts.stopped_count + sel_counts.queued_count) > 0);
       gtr_action_set_sensitive ("torrent-verify",          has_selection);
+      gtr_action_set_sensitive ("torrent-verify-no-hash-check",          has_selection);
       gtr_action_set_sensitive ("remove-torrent",          has_selection);
       gtr_action_set_sensitive ("delete-torrent",          has_selection);
       gtr_action_set_sensitive ("relocate-torrent",        has_selection);
@@ -1580,6 +1581,7 @@ gtr_actions_handler (const char * action_name, gpointer user_data)
         || !g_strcmp0 (action_name, "torrent-stop")
         || !g_strcmp0 (action_name, "torrent-reannounce")
         || !g_strcmp0 (action_name, "torrent-verify")
+        || !g_strcmp0 (action_name, "torrent-verify-no-hash-check")
         || !g_strcmp0 (action_name, "queue-move-top")
         || !g_strcmp0 (action_name, "queue-move-up")
         || !g_strcmp0 (action_name, "queue-move-down")

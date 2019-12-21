@@ -32,7 +32,8 @@
       <menuitem action='torrent-stop'/> 
       <separator/> 
       <menuitem action='relocate-torrent'/> 
-      <menuitem action='torrent-verify'/> 
+      <menuitem action='torrent-verify'/>
+      <menuitem action='torrent-verify-no-hash-check'/>
       <menuitem action='copy-magnet-link-to-clipboard'/> 
       <separator/> 
       <menuitem action='remove-torrent'/> 
@@ -106,8 +107,9 @@
     <menuitem action='torrent-stop'/> 
     <separator/> 
     <menuitem action='relocate-torrent'/> 
-    <menuitem action='torrent-verify'/> 
-    <menuitem action='copy-magnet-link-to-clipboard'/> 
+    <menuitem action='torrent-verify'/>
+    <menuitem action='torrent-verify-no-hash-check'/>
+    <menuitem action='copy-magnet-link-to-clipboard'/>
     <separator/> 
     <menuitem action='remove-torrent'/> 
     <menuitem action='delete-torrent'/> 

@@ -955,6 +955,19 @@ Session::verifyTorrents (const QSet<int>& ids)
 }
 
 void
+Session::skipHashCheck (const QSet<int>& ids)
+{
+    if (!ids.isEmpty ())
+    {
+        tr_variant args;
+        tr_variantInitDict(&args, 1);
+        addOptionalIds(&args, ids);
+
+        exec("torrent-verify-no-hash-check", &args);
+    }
+}
+
+void
 Session::reannounceTorrents (const QSet<int>& ids)
 {
   if (!ids.isEmpty ())

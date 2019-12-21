@@ -99,6 +99,7 @@ static GtkActionEntry entries[] =
     { "show-stats", NULL, N_("_Statistics"), NULL, NULL, G_CALLBACK (action_cb) },
     { "donate", NULL, N_("_Donate"), NULL, NULL, G_CALLBACK (action_cb) },
     { "torrent-verify", NULL, N_("_Verify Local Data"), "<control>V", NULL, G_CALLBACK (action_cb) },
+    { "torrent-verify-no-hash-check", NULL, N_("_Skip hash check"), "<control>V", NULL, G_CALLBACK (action_cb) },
     { "torrent-stop", GTK_STOCK_MEDIA_PAUSE, N_("_Pause"), "<control>P", N_("Pause torrent"), G_CALLBACK (action_cb) },
     { "pause-all-torrents", GTK_STOCK_MEDIA_PAUSE, N_("_Pause All"), NULL, N_("Pause all torrents"), G_CALLBACK (action_cb) },
     { "start-all-torrents", GTK_STOCK_MEDIA_PLAY, N_("_Start All"), NULL, N_("Start all torrents"), G_CALLBACK (action_cb) },

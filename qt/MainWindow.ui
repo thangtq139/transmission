@@ -209,6 +209,7 @@
     <addaction name="separator"/>
     <addaction name="action_SetLocation"/>
     <addaction name="action_Verify"/>
+    <addaction name="action_SkipHashCheck"/>
     <addaction name="action_CopyMagnetToClipboard"/>
     <addaction name="separator"/>
     <addaction name="action_Remove"/>
@@ -402,6 +403,17 @@
    </property>
    <property name="shortcut">
     <string notr="true">Ctrl+V</string>
+   </property>
+  </action>
+    <action name="action_SkipHashCheck">
+   <property name="text">
+    <string>&amp;Skip hash check</string>
+   </property>
+   <property name="toolTip">
+    <string>Skip hash check</string>
+   </property>
+   <property name="shortcut">
+    <string notr="true">Ctrl+L</string>
    </property>
   </action>
   <action name="action_Remove">

@@ -64,6 +64,7 @@ class MainWindow: public QMainWindow
     void removeSelected ();
     void deleteSelected ();
     void verifySelected ();
+    void skipHashCheckSelected ();
     void queueMoveTop ();
     void queueMoveUp ();
     void queueMoveDown ();

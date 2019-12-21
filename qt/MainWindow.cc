@@ -161,6 +161,7 @@ MainWindow::MainWindow (Session& session, Prefs& prefs, TorrentModel& model, boo
   connect (ui.action_Remove, SIGNAL (triggered ()), this, SLOT (removeSelected ()));
   connect (ui.action_Delete, SIGNAL (triggered ()), this, SLOT (deleteSelected ()));
   connect (ui.action_Verify, SIGNAL (triggered ()), this, SLOT (verifySelected ()));
+  connect (ui.action_SkipHashCheck, SIGNAL (triggered ()), this, SLOT (skipHashCheckSelected ()));
   connect (ui.action_Announce, SIGNAL (triggered ()), this, SLOT (reannounceSelected ()));
   connect (ui.action_StartAll, SIGNAL (triggered ()), this, SLOT (startAll ()));
   connect (ui.action_PauseAll, SIGNAL (triggered ()), this, SLOT (pauseAll ()));
@@ -794,6 +795,7 @@ MainWindow::refreshActionSensitivity ()
   const bool oneSelection (selected == 1);
 
   ui.action_Verify->setEnabled (haveSelectionWithMetadata);
+  ui.action_SkipHashCheck->setEnabled (haveSelectionWithMetadata);
   ui.action_Remove->setEnabled (haveSelection);
   ui.action_Delete->setEnabled (haveSelection);
   ui.action_Properties->setEnabled (haveSelection);
@@ -904,6 +906,11 @@ void
 MainWindow::verifySelected ()
 {
   mySession.verifyTorrents (getSelectedTorrents (true));
+}
+void
+MainWindow::skipHashCheckSelected ()
+{
+    mySession.skipHashCheck (getSelectedTorrents (true));
 }
 void
 MainWindow::reannounceSelected ()

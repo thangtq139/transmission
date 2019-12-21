@@ -2211,7 +2211,7 @@ methods[] =
   { "torrent-start-now",     true,  torrentStartNow     },
   { "torrent-stop",          true,  torrentStop         },
   { "torrent-verify",        true,  torrentVerify       },
-  { "torrent-verify-no-hash-checkt",        true,  torrentVerifyNoHashCheck       },
+  { "torrent-verify-no-hash-check",        true,  torrentVerifyNoHashCheck       },
   { "torrent-reannounce",    true,  torrentReannounce   },
   { "queue-move-top",        true,  queueMoveTop        },
   { "queue-move-up",         true,  queueMoveUp         },

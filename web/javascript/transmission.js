@@ -187,6 +187,7 @@ Transmission.prototype =
 			remove:               function() { tr.removeSelectedTorrents(); },
 			remove_data:          function() { tr.removeSelectedTorrentsAndData(); },
 			verify:               function() { tr.verifySelectedTorrents(); },
+			skip_hash_check:      function() { tr.skipHashCheckSelectedTorrents(); },
 			rename:               function() { tr.renameSelectedTorrents(); },
 			reannounce:           function() { tr.reannounceSelectedTorrents(); },
 			move_top:             function() { tr.moveTop(); },
@@ -1107,6 +1108,10 @@ Transmission.prototype =
 		this.remote.renameTorrent([torrent.getId()], oldpath, newname, this.onTorrentRenamed, this);
 	},
 
+	skipHashCheckSelectedTorrents: function() {
+	    this.skipHashCheckTorrents(this.getSelectedTorrents());
+	},
+
 	verifySelectedTorrents: function() {
 		this.verifyTorrents(this.getSelectedTorrents());
 	},
@@ -1129,8 +1134,14 @@ Transmission.prototype =
 		this.remote.startTorrents(this.getTorrentIds(torrents), force,
 		                          this.refreshTorrents, this);
 	},
+	skipHashCheckTorrent: function(torrent) {
+	    this.skipHashCheckTorrents([torrent]);
+	},
 	verifyTorrent: function(torrent) {
 		this.verifyTorrents([ torrent ]);
+	},
+	skipHashCheckTorrents: function(torrents) {
+	    this.remote.skipHashCheck(this.getTorrentIds(torrents), this.refreshTorrents, this);
 	},
 	verifyTorrents: function(torrents) {
 		this.remote.verifyTorrents(this.getTorrentIds(torrents),

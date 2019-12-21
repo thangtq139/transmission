@@ -213,6 +213,9 @@ TransmissionRemote.prototype =
 			remote._controller.refreshTorrents();
 		});
 	},
+	skipHashCheck: function(torrent_ids, callback, context) {
+	    this.sendTorrentActionRequests('torrent-verify-no-hash-check', torrent_ids, callback, context);
+	},
 	verifyTorrents: function(torrent_ids, callback, context) {
 		this.sendTorrentActionRequests('torrent-verify', torrent_ids, callback, context);
 	},

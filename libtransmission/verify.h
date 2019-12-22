@@ -29,7 +29,11 @@ void tr_verifyAddNoHashCheck (tr_torrent           * tor,
 
 void tr_verifyRemove (tr_torrent * tor);
 
+void tr_skipHashRemove (tr_torrent * tor);
+
 void tr_verifyClose (tr_session *);
+
+void tr_skipHashClose (tr_session *);
 
 /* @} */
 

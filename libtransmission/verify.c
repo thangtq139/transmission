@@ -56,7 +56,7 @@ static bool verify_no_hash_check(tr_torrent *tor, bool *stopFlag)
     const time_t begin = tr_time ();
     const size_t buflen = 1024 * 1024; /* 1MB buffer */
 
-    tr_logAddTorDbg (tor, "%s", "verifying torrent...");
+    tr_logAddTorDbg (tor, "%s", "verifying torrent... (skip hash check)");
     tr_torrentSetChecked (tor, 0);
     while (!*stopFlag && (pieceIndex < tor->info.pieceCount))
     {
@@ -82,6 +82,7 @@ static bool verify_no_hash_check(tr_torrent *tor, bool *stopFlag)
                 if (get_info_success) {
                     file_length = file_info.size;
                 }
+                tr_sys_file_close (fd, NULL);
             }
             tr_free (filename);
             prevFileIndex = fileIndex;
@@ -101,8 +102,8 @@ static bool verify_no_hash_check(tr_torrent *tor, bool *stopFlag)
                 left_in_actual_file = 0;
             else
                 left_in_actual_file = file_length - filePos;
-            bytesThisPass = MIN(bytesThisPass, left_in_actual_file);
-            piece_len_on_file += bytesThisPass;
+            left_in_actual_file = MIN(bytesThisPass, left_in_actual_file);
+            piece_len_on_file += left_in_actual_file;
         }
 
         /* move our offsets */
@@ -146,17 +147,12 @@ static bool verify_no_hash_check(tr_torrent *tor, bool *stopFlag)
         {
             if (fd != TR_BAD_SYS_FILE)
             {
-                tr_sys_file_close (fd, NULL);
                 fd = TR_BAD_SYS_FILE;
             }
             fileIndex++;
             filePos = 0;
         }
     }
-
-    /* cleanup */
-    if (fd != TR_BAD_SYS_FILE)
-        tr_sys_file_close (fd, NULL);
 
     /* stopwatch */
     end = tr_time ();
@@ -309,6 +305,11 @@ struct verify_node
   uint64_t              current_size;
 };
 
+static struct verify_node skip_hash_current_node;
+static tr_list *skip_hash_list = NULL;
+static tr_thread *skip_hash_thread = NULL;
+static bool stop_skip_hash_current = false;
+
 static struct verify_node currentNode;
 static tr_list * verifyList = NULL;
 static tr_thread * verifyThread = NULL;
@@ -335,34 +336,34 @@ verifyNoHashCheckThreadFunc (void * unused UNUSED)
         struct verify_node * node;
 
         tr_lockLock (getVerifyLock ());
-        stopCurrent = false;
-        node = (struct verify_node*) verifyList ? verifyList->data : NULL;
+        stop_skip_hash_current = false;
+        node = (struct verify_node*) skip_hash_list ? skip_hash_list->data : NULL;
         if (node == NULL)
         {
-            currentNode.torrent = NULL;
+            skip_hash_current_node.torrent = NULL;
             break;
         }
 
-        currentNode = *node;
-        tor = currentNode.torrent;
-        tr_list_remove_data (&verifyList, node);
+        skip_hash_current_node = *node;
+        tor = skip_hash_current_node.torrent;
+        tr_list_remove_data (&skip_hash_list, node);
         tr_free (node);
         tr_lockUnlock (getVerifyLock ());
 
-        tr_logAddTorInfo (tor, "%s", _("Verifying torrent"));
+        tr_logAddTorInfo (tor, "%s", _("Verifying torrent (skip hash check)"));
         tr_torrentSetVerifyState (tor, TR_VERIFY_NOW);
-        changed = verify_no_hash_check (tor, &stopCurrent);
+        changed = verify_no_hash_check (tor, &stop_skip_hash_current);
         tr_torrentSetVerifyState (tor, TR_VERIFY_NONE);
         assert (tr_isTorrent (tor));
 
-        if (!stopCurrent && changed)
+        if (!stop_skip_hash_current && changed)
             tr_torrentSetDirty (tor);
 
-        if (currentNode.callback_func)
-            (*currentNode.callback_func)(tor, stopCurrent, currentNode.callback_data);
+        if (skip_hash_current_node.callback_func)
+            (*skip_hash_current_node.callback_func)(tor, stop_skip_hash_current, skip_hash_current_node.callback_data);
     }
 
-    verifyThread = NULL;
+    skip_hash_thread = NULL;
     tr_lockUnlock (getVerifyLock ());
 }
 
@@ -435,7 +436,7 @@ tr_verifyAddNoHashCheck (tr_torrent           * tor,
     struct verify_node * node;
 
     assert (tr_isTorrent (tor));
-    tr_logAddTorInfo (tor, "%s", _("Queued for verification"));
+    tr_logAddTorInfo (tor, "%s", _("Queued for verification (skip hash check)"));
 
     node = tr_new (struct verify_node, 1);
     node->torrent = tor;
@@ -445,9 +446,9 @@ tr_verifyAddNoHashCheck (tr_torrent           * tor,
 
     tr_lockLock (getVerifyLock ());
     tr_torrentSetVerifyState (tor, TR_VERIFY_WAIT);
-    tr_list_insert_sorted (&verifyList, node, compareVerifyByPriorityAndSize);
-    if (verifyThread == NULL)
-        verifyThread = tr_threadNew (verifyNoHashCheckThreadFunc, NULL);
+    tr_list_insert_sorted (&skip_hash_list, node, compareVerifyByPriorityAndSize);
+    if (skip_hash_thread == NULL)
+        skip_hash_thread = tr_threadNew (verifyNoHashCheckThreadFunc, NULL);
     tr_lockUnlock (getVerifyLock ());
 }
 
@@ -481,6 +482,43 @@ compareVerifyByTorrent (const void * va, const void * vb)
   const struct verify_node * a = va;
   const tr_torrent * b = vb;
   return a->torrent - b;
+}
+
+void
+tr_skipHashRemove (tr_torrent * tor)
+{
+  tr_lock * lock = getVerifyLock ();
+  tr_lockLock (lock);
+
+  assert (tr_isTorrent (tor));
+
+  if (tor == skip_hash_current_node.torrent)
+    {
+      stop_skip_hash_current = true;
+
+      while (stop_skip_hash_current)
+        {
+          tr_lockUnlock (lock);
+          tr_wait_msec (100);
+          tr_lockLock (lock);
+        }
+    }
+  else
+    {
+      struct verify_node * node = tr_list_remove (&skip_hash_list, tor, compareVerifyByTorrent);
+
+      tr_torrentSetVerifyState (tor, TR_VERIFY_NONE);
+
+      if (node != NULL)
+        {
+          if (node->callback_func != NULL)
+            (*node->callback_func)(tor, true, node->callback_data);
+
+          tr_free (node);
+        }
+    }
+
+  tr_lockUnlock (lock);
 }
 
 void
@@ -521,13 +559,24 @@ tr_verifyRemove (tr_torrent * tor)
 }
 
 void
-tr_verifyClose (tr_session * session UNUSED)
+tr_skipHashClose (tr_session * session UNUSED)
 {
   tr_lockLock (getVerifyLock ());
 
-  stopCurrent = true;
-  tr_list_free (&verifyList, tr_free);
+  stop_skip_hash_current = true;
+  tr_list_free (&skip_hash_list, tr_free);
 
   tr_lockUnlock (getVerifyLock ());
+}
+
+void
+tr_verifyClose (tr_session * session UNUSED)
+{
+    tr_lockLock (getVerifyLock ());
+
+    stopCurrent = true;
+    tr_list_free (&verifyList, tr_free);
+
+    tr_lockUnlock (getVerifyLock ());
 }
 

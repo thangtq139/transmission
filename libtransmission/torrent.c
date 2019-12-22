@@ -1807,6 +1807,7 @@ verifyTorrentNoHashCheck (void * vdata)
   tr_sessionLock (tor->session);
 
   /* if the torrent's already being verified, stop it */
+  tr_skipHashRemove (tor);
   tr_verifyRemove (tor);
 
   startAfter = (tor->isRunning || tor->startAfterVerify) && !tor->isStopping;
@@ -1832,6 +1833,7 @@ verifyTorrent (void * vdata)
 
   /* if the torrent's already being verified, stop it */
   tr_verifyRemove (tor);
+  tr_skipHashRemove (tor);
 
   startAfter = (tor->isRunning || tor->startAfterVerify) && !tor->isStopping;
   if (tor->isRunning)
@@ -1899,6 +1901,7 @@ stopTorrent (void * vtor)
   tr_torrentLock (tor);
 
   tr_verifyRemove (tor);
+  tr_skipHashRemove (tor);
   tr_peerMgrStopTorrent (tor);
   tr_announcerTorrentStopped (tor);
   tr_cacheFlushTorrent (tor->session->cache, tor);
@@ -3172,6 +3175,7 @@ setLocation (void * vdata)
 
       /* bad idea to move files while they're being verified... */
       tr_verifyRemove (tor);
+      tr_skipHashRemove (tor);
 
       /* try to move the files.
        * FIXME: there are still all kinds of nasty cases, like what

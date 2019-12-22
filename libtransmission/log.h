@@ -14,6 +14,7 @@
 
 #include "file.h" /* tr_sys_file_t */
 #include "utils.h" /* TR_GNUC_PRINTF, TR_GNUC_NONNULL */
+#include "stdio.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -34,6 +35,14 @@ void tr_logAddMessage (const char   * file,
                        tr_log_level   level,
                        const char   * torrent,
                        const char   * fmt, ...) TR_GNUC_PRINTF (5, 6);
+
+#define tr_logStdErr(fmt, ...) \
+  do \
+    { \
+      if (tr_logLevelIsActive (TR_LOG_DEBUG)) \
+        fprintf(stderr, fmt, __VA_ARGS__); \
+    } \
+  while (0)
 
 #define tr_logAddNamedError(n, ...) \
   do\

@@ -1810,6 +1810,7 @@ sessionCloseImplStart (tr_session * session)
   session->nowTimer = NULL;
 
   tr_verifyClose (session);
+  tr_skipHashClose(session);
   tr_sharedClose (session);
   tr_rpcClose (&session->rpcServer);
 

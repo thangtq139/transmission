@@ -13,6 +13,7 @@
 #include "completion.h"
 #include "torrent.h"
 #include "utils.h"
+#include "log.h"
 
 /***
 ****

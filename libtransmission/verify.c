@@ -39,6 +39,11 @@ enum
   MSEC_TO_SLEEP_PER_SECOND_DURING_VERIFY = 100
 };
 
+enum
+{
+  MSEC_TO_SLEEP_PER_ITER_DURING_SKIP_HASH_CHECK = 5
+};
+
 static bool verify_no_hash_check(tr_torrent *tor, bool *stopFlag)
 {
     time_t end;
@@ -58,6 +63,11 @@ static bool verify_no_hash_check(tr_torrent *tor, bool *stopFlag)
 
     tr_logAddTorDbg (tor, "%s", "verifying torrent... (skip hash check)");
     tr_torrentSetChecked (tor, 0);
+    // heuristic pre-alloc
+    if (tor->info.pieceCount) {
+        tr_torrentSetHasPiece (tor, tor->info.pieceCount - 1, true);
+        tr_torrentSetHasPiece (tor, tor->info.pieceCount - 1, false);
+    }
     while (!*stopFlag && (pieceIndex < tor->info.pieceCount))
     {
         uint64_t leftInPiece;
@@ -92,7 +102,7 @@ static bool verify_no_hash_check(tr_torrent *tor, bool *stopFlag)
         leftInPiece = tr_torPieceCountBytes (tor, pieceIndex) - piecePos;
         leftInFile = file->length - filePos;
         bytesThisPass = MIN (leftInFile, leftInPiece);
-        bytesThisPass = MIN (bytesThisPass, buflen);
+        // bytesThisPass = MIN (bytesThisPass, buflen);
 
         /* read a bit */
         if (fd != TR_BAD_SYS_FILE)
@@ -134,7 +144,7 @@ static bool verify_no_hash_check(tr_torrent *tor, bool *stopFlag)
             if (lastSleptAt != now)
             {
                 lastSleptAt = now;
-                tr_wait_msec (MSEC_TO_SLEEP_PER_SECOND_DURING_VERIFY);
+                // tr_wait_msec (MSEC_TO_SLEEP_PER_ITER_DURING_SKIP_HASH_CHECK);
             }
 
             pieceIndex++;

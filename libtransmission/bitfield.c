@@ -13,6 +13,7 @@
 #include "transmission.h"
 #include "bitfield.h"
 #include "utils.h" /* tr_new0 () */
+#include "log.h"
 
 const tr_bitfield TR_BITFIELD_INIT = { NULL, 0, 0, 0, false, false };
 
@@ -261,7 +262,7 @@ tr_bitfieldSetTrueCount (tr_bitfield * b, size_t n)
   if (tr_bitfieldHasAll (b) || tr_bitfieldHasNone (b))
     tr_bitfieldFreeArray (b);
 
-  assert (tr_bitfieldIsValid (b));
+  // assert (tr_bitfieldIsValid (b));
 }
 
 static void
